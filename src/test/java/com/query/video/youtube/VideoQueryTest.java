@@ -1,11 +1,9 @@
 package com.query.video.youtube;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchResult;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
@@ -16,7 +14,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple App.
+ * Unit test for VideoQueryService
  */
 public class VideoQueryTest extends TestCase {
 	private VideoQueryService videoQuery;
@@ -46,7 +44,7 @@ public class VideoQueryTest extends TestCase {
 
 	/**
 	 * @throws IOException
-	 * tests the number of videos returned
+	 *             tests the number of videos returned
 	 */
 	public void testSearchResultsSize() throws IOException {
 		String queryTerm = "test";
@@ -66,21 +64,16 @@ public class VideoQueryTest extends TestCase {
 
 		YouTube.Search.List search = videoQuery.defineVideoSearchRequest(searchParams);
 		List<SearchResult> searchResultList = videoQuery.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
-		Iterator<SearchResult> iterator = searchResultList.iterator();
-		while (iterator.hasNext()) {
-			SearchResult singleVideo = iterator.next();
-			ResourceId rId = singleVideo.getId();
-			if (rId.getKind().equals("youtube#video")) {
-				assertNotNull(singleVideo.getSnippet().getTitle(), true);
-				assertNotNull(singleVideo.getSnippet().getDescription(), true);
-			}
+		for (SearchResult singleVideo : searchResultList) {
+			assertNotNull(singleVideo.getSnippet().getTitle(), true);
+			assertNotNull(singleVideo.getSnippet().getDescription(), true);
 		}
 	}
 
-	private static SearchParameters setSearchParameters(String queryTerm) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder()
-				.withPart(PART).withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm)
-				.withQueryFields(SEARCH_QUERY_FIELDS).withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
+	private SearchParameters setSearchParameters(String queryTerm) {
+		SearchParameters searchOptionalParams = new SearchParameters.Builder().withPart(PART)
+				.withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
+				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
 		return searchOptionalParams;
 	}
 }

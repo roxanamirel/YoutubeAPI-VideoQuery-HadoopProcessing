@@ -30,7 +30,7 @@ public class Main {
 			List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
 
 			// write results to File
-			Utils.writeToFile(searchResultList.iterator(), queryTerm);
+			Utils.writeToFile(searchResultList, queryTerm);
 
 		} catch (GoogleJsonResponseException e) {
 			System.err.println(e.getDetails().getCode() + " : " + e.getDetails().getMessage());

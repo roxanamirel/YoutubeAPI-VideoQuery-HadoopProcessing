@@ -6,12 +6,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.google.api.services.youtube.model.ResourceId;
 import com.google.api.services.youtube.model.SearchResult;
 
 public class Utils {
+	private static final String CSN = "UTF-8";
+	private static final String FILE_NAME_PART = "Results.txt";
 
 	/*
 	 * Prompts the user with option to enter search criteria and returns the
@@ -33,60 +37,36 @@ public class Utils {
 		return searchString;
 	}
 
-	/*
-	 * For each result, print the
-	 * title,description and video ID
-	 *
-	 * @param iteratorSearchResults Iterator of SearchResults to print
-	 *
-	 * @param query Search query (String)
-	 */
-	public static void prettyPrint(Iterator<SearchResult> iteratorSearchResults, String query) {
-
-		System.out.println("\n=============================================================");
-		System.out.println("  New videos for search on \"" + query + "\".");
-		System.out.println("=============================================================\n");
-
-		if (!iteratorSearchResults.hasNext()) {
-			System.out.println(" No videos found for:" + query);
-		}
-
+	public static List<SearchResult> checkVideoResults(List<SearchResult> items) {
+		Iterator<SearchResult> iteratorSearchResults = items.iterator();
+		List<SearchResult> videoResults = new ArrayList<SearchResult>();
 		while (iteratorSearchResults.hasNext()) {
-
 			SearchResult singleVideo = iteratorSearchResults.next();
 			ResourceId rId = singleVideo.getId();
 
 			// Check that the result is a video
 			if (rId.getKind().equals("youtube#video")) {
-
-				System.out.println(" Video Id" + rId.getVideoId());
-				System.out.println(" Title: " + singleVideo.getSnippet().getTitle());
-				System.out.println(" Description: " + singleVideo.getSnippet().getDescription());
-				System.out.println("\n-------------------------------------------------------------\n");
+				videoResults.add(singleVideo);
 			}
 		}
+		return videoResults;
 	}
 
-	public static void writeToFile(Iterator<SearchResult> iteratorSearchResults, String query) {
-		if (!iteratorSearchResults.hasNext()) {
+	public static void writeToFile(List<SearchResult> searchResults, String query) {
+		if (searchResults.isEmpty()) {
 			System.out.println(" No video info to write to file for query:" + query);
 		}
 		PrintWriter writer;
 		try {
-			writer = new PrintWriter(query + "Results.txt", "UTF-8");
-			while (iteratorSearchResults.hasNext()) {
-				SearchResult singleVideo = iteratorSearchResults.next();
-				ResourceId rId = singleVideo.getId();
-
-				// Check that the result is a video
-				if (rId.getKind().equals("youtube#video")) {
-					writer.println(singleVideo.getSnippet().getTitle());
-					writer.println(singleVideo.getSnippet().getDescription());
-				}
+			writer = new PrintWriter(query + FILE_NAME_PART, CSN);
+			for (SearchResult videoResult: searchResults){
+				writer.println(videoResult.getSnippet().getTitle());
+				writer.println(videoResult.getSnippet().getDescription());
 			}
+			
 			writer.close();
+			
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

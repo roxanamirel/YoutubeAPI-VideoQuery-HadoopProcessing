@@ -14,6 +14,7 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.utils.PropertiesFileLoader;
 import com.query.video.youtube.utils.SearchParameters;
+import com.query.video.youtube.utils.Utils;
 
 public class VideoQueryServiceImpl implements VideoQueryService {
 
@@ -41,7 +42,6 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 		do {
 			numberOfPages--;
 			search.setPageToken(nextToken);
-			// Call the API
 			SearchListResponse searchResponse = new SearchListResponse();
 			try {
 				searchResponse = search.execute();
@@ -49,11 +49,16 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 				System.err.println(e.getCause() + " : " + e.getMessage());
 				e.printStackTrace();
 			}
-			searchResultList.addAll(searchResponse.getItems());
+			List<SearchResult> videoResults = Utils.checkVideoResults(searchResponse.getItems());
+			//add results from all pages to a list
+			searchResultList.addAll(videoResults);
+			
 			nextToken = searchResponse.getNextPageToken();
+			
 		} while (nextToken != null && numberOfPages > 0);
 		return searchResultList;
 	}
+
 
 	@Override
 	public YouTube.Search.List defineVideoSearchRequest(SearchParameters searchParams) {
@@ -76,5 +81,4 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 		}
 		return search;
 	}
-
 }
