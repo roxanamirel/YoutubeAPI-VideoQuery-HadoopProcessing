@@ -1,4 +1,4 @@
-package com.query.video.youtube.utils;
+package com.query.video.youtube.main;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +21,10 @@ import com.query.video.youtube.hadoop.WordCount.TokenizerMapper;
 import com.query.video.youtube.hadoop.WordCount.TokenizerReducer;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
+import com.query.video.youtube.utils.SearchParameters;
+import com.query.video.youtube.utils.Utils;
 
-public class Main {
+public class HadoopMain {
 	private static final String PART = "snippet";
 	private static final String SEARCH_QUERY_FIELDS = "items(id/kind,id/videoId,snippet/title,snippet/description),nextPageToken";
 	private static final String SEARCH_VIDEO_TYPE = "video";
@@ -32,6 +34,11 @@ public class Main {
 
 	public static void main(String[] args) {
 
+		if (args.length != 2) {
+			System.out.println("USAGE + First Parameter = hadoop input directory (e.g. /input)  \n"
+					+ "Second parameter = hadoop output directory");
+			System.exit(-1);
+		}
 		File resultFile = new File("");
 		String queryTerm = "";
 		try {
@@ -75,14 +82,13 @@ public class Main {
 			fs.copyFromLocalFile(new Path(resultFile.getName()), new Path(args[0] + "/" + resultFile.getName()));
 			FileOutputFormat.setOutputPath(job, new Path(args[1]));
 			job.waitForCompletion(true);
-			fs.copyToLocalFile(new Path(args[1]), new Path(
-					hadoopOutputDir + "/" + resultFile.getName().substring(0, resultFile.getName().length() - 4)));
+			// set the name of the output directory to be the same as the output
+			// file name but without .txt
+			String outputDir = hadoopOutputDir + "/"
+					+ resultFile.getName().substring(0, resultFile.getName().length() - 4);
+			fs.copyToLocalFile(new Path(args[1]), new Path(outputDir));
 
-		} catch (IOException | ClassNotFoundException |
-
-		InterruptedException e)
-
-		{
+		} catch (IOException | ClassNotFoundException | InterruptedException e) {
 			System.err.println(e.getCause() + " : " + e.getMessage());
 			e.printStackTrace();
 		}

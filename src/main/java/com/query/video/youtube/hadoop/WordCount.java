@@ -1,6 +1,8 @@
 package com.query.video.youtube.hadoop;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.io.IntWritable;
@@ -14,6 +16,9 @@ public class WordCount {
 
 		private final static IntWritable one = new IntWritable(1);
 		private Text word = new Text();
+		// all words that are not relevant for the videos
+		private List<String> irrelevantWords = Arrays.asList("the", "a", "an", "compilation", "in", "on", "and", "or",
+				"so", "such", "at", "video");
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
@@ -22,8 +27,13 @@ public class WordCount {
 			String cleanWord = value.toString().replaceAll("[^\\p{L} ]", "").toLowerCase();
 			StringTokenizer itr = new StringTokenizer(cleanWord);
 			while (itr.hasMoreTokens()) {
-				word.set(itr.nextToken());
-				context.write(word, one);
+				String wordString = itr.nextToken();
+				// filter words that are irrelevant or words composed of one
+				// letter
+				if (!irrelevantWords.contains(wordString) && wordString.length() > 1) {
+					word.set(wordString);
+					context.write(word, one);
+				}
 			}
 		}
 	}
