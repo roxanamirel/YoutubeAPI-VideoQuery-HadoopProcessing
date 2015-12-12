@@ -1,11 +1,24 @@
 package com.query.video.youtube.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.hadoop.WordCount;
+import com.query.video.youtube.hadoop.WordCount.TokenizerMapper;
+import com.query.video.youtube.hadoop.WordCount.TokenizerReducer;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
 
@@ -15,11 +28,15 @@ public class Main {
 	private static final String SEARCH_VIDEO_TYPE = "video";
 	private static final long NUMBER_OF_RESULTS_RETURNED = 25;
 	private static final int NUMBER_OF_PAGES = 3;
+	private static final String hadoopOutputDir = "hadoopOutputDir";
 
 	public static void main(String[] args) {
+
+		File resultFile = new File("");
+		String queryTerm = "";
 		try {
 			// Prompt the user to enter a query term.
-			String queryTerm = Utils.getSearchCriteria();
+			queryTerm = Utils.getSearchCriteria();
 
 			SearchParameters searchOptionalParams = setSearchParameters(queryTerm);
 
@@ -30,7 +47,7 @@ public class Main {
 			List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
 
 			// write results to File
-			Utils.writeToFile(searchResultList, queryTerm);
+			resultFile = Utils.writeToFile(searchResultList, queryTerm);
 
 		} catch (GoogleJsonResponseException e) {
 			System.err.println(e.getDetails().getCode() + " : " + e.getDetails().getMessage());
@@ -40,6 +57,34 @@ public class Main {
 			e.printStackTrace();
 		} catch (Throwable t) {
 			t.printStackTrace();
+		}
+
+		try {
+			Configuration conf = new Configuration();
+			conf.addResource(new Path("/home/hadoop/hadoop-2.7.1/etc/hadoop/core-site.xml"));
+			conf.addResource(new Path("/home/hadoop/hadoop-2.7.1/etc/hadoop/hdfs-site.xml"));
+			FileSystem fs = FileSystem.get(conf);
+			Job job = Job.getInstance(conf, "word count");
+			job.setJarByClass(WordCount.class);
+			job.setMapperClass(TokenizerMapper.class);
+			job.setCombinerClass(TokenizerReducer.class);
+			job.setReducerClass(TokenizerReducer.class);
+			job.setOutputKeyClass(Text.class);
+			job.setOutputValueClass(IntWritable.class);
+			FileInputFormat.addInputPath(job, new Path(args[0]));
+			fs.copyFromLocalFile(new Path(resultFile.getName()), new Path(args[0] + "/" + resultFile.getName()));
+			FileOutputFormat.setOutputPath(job, new Path(args[1]));
+			job.waitForCompletion(true);
+			fs.copyToLocalFile(new Path(args[1]), new Path(
+					hadoopOutputDir + "/" + resultFile.getName().substring(0, resultFile.getName().length() - 4)));
+
+		} catch (IOException | ClassNotFoundException |
+
+		InterruptedException e)
+
+		{
+			System.err.println(e.getCause() + " : " + e.getMessage());
+			e.printStackTrace();
 		}
 
 	}
