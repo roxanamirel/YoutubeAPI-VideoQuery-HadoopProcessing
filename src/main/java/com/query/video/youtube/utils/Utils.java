@@ -34,7 +34,7 @@ public class Utils {
 	}
 
 	/*
-	 * Prints out all results in the Iterator. For each result, print the
+	 * For each result, print the
 	 * title,description and video ID
 	 *
 	 * @param iteratorSearchResults Iterator of SearchResults to print

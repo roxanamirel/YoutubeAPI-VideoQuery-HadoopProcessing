@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class PropertiesManagement {
+import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
+
+public class PropertiesFileLoader {
 	/**
 	 * File that contains my developer's API key and application name
 	 */
@@ -28,7 +30,7 @@ public class PropertiesManagement {
 		// Read the developer key from the properties file.
 		Properties properties = new Properties();
 		try {
-			InputStream in = VideoQuery.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
+			InputStream in = VideoQueryServiceImpl.class.getResourceAsStream("/" + PROPERTIES_FILENAME);
 			properties.load(in);
 
 		} catch (IOException e) {
