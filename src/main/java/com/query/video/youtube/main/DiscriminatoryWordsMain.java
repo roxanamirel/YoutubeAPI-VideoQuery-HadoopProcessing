@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.query.video.youtube.constants.HadoopConstants;
 import com.query.video.youtube.models.WordFrequencyTuple;
+import com.query.video.youtube.service.VideoManager;
 import com.query.video.youtube.service.impl.VideoManagerImpl;
 import com.query.video.youtube.utils.Utils;
 
@@ -23,7 +24,7 @@ public class DiscriminatoryWordsMain {
 		String outputDir1 = HadoopConstants.HADOOP_OUTPUT_DIR + "/" + args[0] + FILENAME_PART;
 		String outputDir2 = HadoopConstants.HADOOP_OUTPUT_DIR + "/" + args[1] + FILENAME_PART;
 
-		VideoManagerImpl videoManager = new VideoManagerImpl();
+		VideoManager videoManager = new VideoManagerImpl();
 
 		// first sort the words by their frequency
 		List<WordFrequencyTuple> list1 = videoManager.createSortedWordFrequencyTuples(outputDir1);
