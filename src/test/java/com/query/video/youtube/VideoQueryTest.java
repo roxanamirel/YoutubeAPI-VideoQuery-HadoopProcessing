@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.constants.YouTubeQueryConstants;
 import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
@@ -17,12 +18,10 @@ import junit.framework.TestSuite;
  * Unit test for VideoQueryService
  */
 public class VideoQueryTest extends TestCase {
-	private VideoQueryService videoQuery;
-	private static final String SEARCH_QUERY_FIELDS = "items(id/kind,id/videoId,snippet/title,snippet/description),nextPageToken";
-	private static final String PART = "snippet";
-	private static final String SEARCH_VIDEO_TYPE = "video";
-	private static final long NUMBER_OF_RESULTS_RETURNED = 25;
+
 	private static final int NUMBER_OF_PAGES = 3;
+
+	private VideoQueryService videoQuery;
 
 	/**
 	 * Create the test case
@@ -48,7 +47,8 @@ public class VideoQueryTest extends TestCase {
 	 */
 	public void testSearchResultsSize() throws IOException {
 		String queryTerm = "test";
-		SearchParameters searchParams = setSearchParameters(queryTerm);
+		SearchParameters searchParams = UtilsTest.setSearchParameters(queryTerm,
+				YouTubeQueryConstants.SEARCH_VIDEO_TYPE);
 		YouTube.Search.List search = videoQuery.defineVideoSearchRequest(searchParams);
 		// get search results
 		List<SearchResult> searchResultList = videoQuery.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
@@ -60,7 +60,8 @@ public class VideoQueryTest extends TestCase {
 	 */
 	public void testSearchResultsFields() {
 		String queryTerm = "test";
-		SearchParameters searchParams = setSearchParameters(queryTerm);
+		SearchParameters searchParams = UtilsTest.setSearchParameters(queryTerm,
+				YouTubeQueryConstants.SEARCH_VIDEO_TYPE);
 
 		YouTube.Search.List search = videoQuery.defineVideoSearchRequest(searchParams);
 		List<SearchResult> searchResultList = videoQuery.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
@@ -70,10 +71,4 @@ public class VideoQueryTest extends TestCase {
 		}
 	}
 
-	private SearchParameters setSearchParameters(String queryTerm) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder(PART)
-				.withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
-				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
-		return searchOptionalParams;
-	}
 }

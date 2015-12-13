@@ -13,6 +13,9 @@ public class PropertiesFileLoader {
 	 */	
 	private static final String PROPERTIES_FILENAME = "youtube.properties";
 	
+	public static final String PROP_APP_NAME = "app.name";
+	public static final String PROP_YOUTUBE_APIKEY = "youtube.apikey";
+	
 	/**
 	 * @param propertyName - the name of the property to be retrieved
 	 * @return the property associated to propertyName

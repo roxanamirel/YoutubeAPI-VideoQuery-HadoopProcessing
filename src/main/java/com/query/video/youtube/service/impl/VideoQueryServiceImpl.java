@@ -14,7 +14,6 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.utils.PropertiesFileLoader;
-import com.query.video.youtube.utils.VideoManager;
 
 public class VideoQueryServiceImpl implements VideoQueryService {
 
@@ -22,8 +21,6 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 	 * Instance of a YouTube object used to make YouTube Data API requests
 	 */
 	private YouTube youtube;
-	private static final String PROP_APP_NAME = "app.name";
-	private static final String PROP_YOUTUBE_APIKEY = "youtube.apikey";
 
 	public VideoQueryServiceImpl() {
 
@@ -31,7 +28,8 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 			@Override
 			public void initialize(HttpRequest request) throws IOException {
 			}
-		}).setApplicationName(PropertiesFileLoader.getPropertyFromProperties(PROP_APP_NAME)).build();
+		}).setApplicationName(PropertiesFileLoader.getPropertyFromProperties(PropertiesFileLoader.PROP_APP_NAME))
+				.build();
 	}
 
 	@Override
@@ -49,9 +47,9 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 				System.err.println(e.getCause() + " : " + e.getMessage());
 				e.printStackTrace();
 			}
-			List<SearchResult> videoResults = new VideoManager().checkVideoResults(searchResponse.getItems());
-			searchResultList.addAll(videoResults);			
-			nextToken = searchResponse.getNextPageToken();			
+			List<SearchResult> videoResults = new VideoManagerImpl().checkVideoResults(searchResponse.getItems());
+			searchResultList.addAll(videoResults);
+			nextToken = searchResponse.getNextPageToken();
 		} while (nextToken != null && numberOfPages > 0);
 		return searchResultList;
 	}
@@ -67,7 +65,7 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 		}
 		if (search != null) {
 			// Set the developer key
-			search.setKey(PropertiesFileLoader.getPropertyFromProperties(PROP_YOUTUBE_APIKEY))
+			search.setKey(PropertiesFileLoader.getPropertyFromProperties(PropertiesFileLoader.PROP_YOUTUBE_APIKEY))
 					.setQ(searchParams.getQueryTerm())
 					// Restrict the search results to only include videos
 					.setType(searchParams.getType())

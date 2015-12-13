@@ -15,32 +15,28 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.constants.HadoopConstants;
+import com.query.video.youtube.constants.YouTubeQueryConstants;
 import com.query.video.youtube.hadoop.WordCount;
 import com.query.video.youtube.hadoop.WordCount.TokenizerMapper;
-import com.query.video.youtube.hadoop.WordCount.TokenizerReducer;
+import com.query.video.youtube.hadoop.WordCount.SumReducer;
 import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
 import com.query.video.youtube.utils.Utils;
 
 public class HadoopMain {
-	private static final String PART = "snippet";
-	private static final String SEARCH_QUERY_FIELDS = "items(id/kind,id/videoId,snippet/title,snippet/description),nextPageToken";
-	private static final String SEARCH_VIDEO_TYPE = "video";
-	private static final long NUMBER_OF_RESULTS_RETURNED = 25;
-	private static final int NUMBER_OF_PAGES = 3;
-	private static final String hadoopOutputDir = "hadoopOutputDir";
-	private static final String CORE_SITE = "/home/hadoop/hadoop-2.7.1/etc/hadoop/core-site.xml";
-	private static final String HDFS_SITE = "/home/hadoop/hadoop-2.7.1/etc/hadoop/hdfs-site.xml";
 
 	public static void main(String[] args) {
 		VideoQueryService service = new VideoQueryServiceImpl();
-		
-		if (args.length != 2) {
+
+		if (args.length != 3) {
 			System.out.println("USAGE + First Parameter = hadoop input directory (e.g. /input)  \n"
-					+ "Second parameter = hadoop output directory");
+					+ "Second parameter = hadoop output directory \n "
+					+ "Third parameter = no. of results pages (!there are 25 results per page)");
 			System.exit(-1);
 		}
+		int numberOfPages = Integer.parseInt(args[2]);
 		
 		// Prompt the user to enter a query term.
 		String queryTerm = Utils.getSearchCriteria();
@@ -48,21 +44,22 @@ public class HadoopMain {
 		SearchParameters searchParams = setSearchParameters(queryTerm);
 		YouTube.Search.List search = service.defineVideoSearchRequest(searchParams);
 		// get search results
-		List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
+		List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search,
+				numberOfPages);
 
 		// write results to File
 		File resultFile = Utils.writeVideoInfoToFile(searchResultList, queryTerm);
 
 		try {
 			Configuration conf = new Configuration();
-			conf.addResource(new Path(CORE_SITE));
-			conf.addResource(new Path(HDFS_SITE));
+			conf.addResource(new Path(HadoopConstants.CORE_SITE));
+			conf.addResource(new Path(HadoopConstants.HDFS_SITE));
 			FileSystem fs = FileSystem.get(conf);
 			Job job = Job.getInstance(conf, "word count");
 			job.setJarByClass(WordCount.class);
 			job.setMapperClass(TokenizerMapper.class);
-			job.setCombinerClass(TokenizerReducer.class);
-			job.setReducerClass(TokenizerReducer.class);
+			job.setCombinerClass(SumReducer.class);
+			job.setReducerClass(SumReducer.class);
 			job.setOutputKeyClass(Text.class);
 			job.setOutputValueClass(IntWritable.class);
 			FileInputFormat.addInputPath(job, new Path(args[0]));
@@ -71,7 +68,7 @@ public class HadoopMain {
 			job.waitForCompletion(true);
 			// set the name of the output directory to be the same as the output
 			// file name but without .txt
-			String outputDir = hadoopOutputDir + "/"
+			String outputDir = HadoopConstants.HADOOP_OUTPUT_DIR + "/"
 					+ resultFile.getName().substring(0, resultFile.getName().length() - 4);
 			fs.copyToLocalFile(new Path(args[1]), new Path(outputDir));
 
@@ -83,10 +80,11 @@ public class HadoopMain {
 	}
 
 	private static SearchParameters setSearchParameters(String queryTerm) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder(PART)
+		SearchParameters searchOptionalParams = new SearchParameters.Builder(YouTubeQueryConstants.PART)
 				// set search resource properties
-				.withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
-				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
+				.withType(YouTubeQueryConstants.SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm)
+				.withQueryFields(YouTubeQueryConstants.SEARCH_QUERY_FIELDS)
+				.withNumberOfResults(YouTubeQueryConstants.NUMBER_OF_RESULTS_RETURNED_PER_PAGE).build();
 		return searchOptionalParams;
 	}
 }
