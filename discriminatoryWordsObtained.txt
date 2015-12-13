@@ -1,14 +1,16 @@
 When searching for PIG (first 5 most discriminative with respect to duck videos info)
-pig 265
-peppa 239
-english 50
-surprise 41
-george 37
+pig 266
+peppa 237
+english 47
+surprise 47
+toys 40
+
 
 
 When searching for DUCK(first 5 most discriminative with respect to pig videos info)
-duck 284
-donald 194
-cartoons 94
+duck 280
+donald 189
+cartoons 90
 chip 72
 dale 70
+

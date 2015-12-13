@@ -78,7 +78,7 @@ public class VideoManagerTest {
 		List<WordFrequencyTuple> discList1 = videoManager.getDiscriminatoryWords(from, against, 3, 20);
 		assertEquals(discList1.get(0).getWord(), "pig");
 		assertEquals(discList1.get(1).getWord(), "peppa");
-		assertEquals(discList1.get(2).getWord(), "animal");
+		assertEquals(discList1.get(2).getWord(), "pigus");
 
 		List<WordFrequencyTuple> discList2 = videoManager.getDiscriminatoryWords(against, from, 3, 20);
 		assertEquals(discList2.get(0).getWord(), "duck");
@@ -95,7 +95,7 @@ public class VideoManagerTest {
 		List<WordFrequencyTuple> discList1 = videoManager.getDiscriminatoryWords(from, against, 20, 20);
 		assertEquals(discList1.get(0).getWord(), "pig");
 		assertEquals(discList1.get(1).getWord(), "peppa");
-		assertEquals(discList1.get(2).getWord(), "animal");
+		assertEquals(discList1.get(2).getWord(), "pigus");
 
 	}
 
@@ -107,10 +107,9 @@ public class VideoManagerTest {
 		List<WordFrequencyTuple> discList1 = videoManager.getDiscriminatoryWords(from, against, 6, 20);
 		assertEquals(discList1.get(0).getWord(), "pig");
 		assertEquals(discList1.get(1).getWord(), "peppa");
-		assertEquals(discList1.get(2).getWord(), "animal");
-		assertEquals(discList1.get(3).getWord(), "pigus");
-		assertEquals(discList1.get(4).getWord(), "series");
-		assertEquals(discList1.get(5).getWord(), "momopig");
+		assertEquals(discList1.get(2).getWord(), "pigus");
+		assertEquals(discList1.get(3).getWord(), "series");
+		assertEquals(discList1.get(4).getWord(), "momopig");
 
 	}
 

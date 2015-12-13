@@ -8,6 +8,8 @@ Technologies:
 Computes discriminatory search words for two YouTube video query terms taking into consideration the title and the description of the videos
 Use auto_run.sh script to make two queries (after pig and duck) and obtain 5 discriminatory results for each.
 
+Import in Eclipse as Existing Maven Project.
+
 Add your own API KEY in the youtube.properties file (see https://console.developers.google.com/start)
 
 This program has two executable jars.

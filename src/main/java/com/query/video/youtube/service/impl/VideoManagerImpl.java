@@ -87,7 +87,7 @@ public class VideoManagerImpl implements VideoManager {
 	private void addDiscriminatoryWord(int threshold, List<WordFrequencyTuple> result, WordFrequencyTuple tupleList1,
 			WordFrequencyTuple tupleList2) {
 		if (null != tupleList2) {
-			if (Math.abs(tupleList1.getFrequency() - tupleList2.getFrequency()) >= threshold) {
+			if ((tupleList1.getFrequency() - tupleList2.getFrequency()) >= threshold) {
 				result.add(tupleList1);
 			}
 		} else {
