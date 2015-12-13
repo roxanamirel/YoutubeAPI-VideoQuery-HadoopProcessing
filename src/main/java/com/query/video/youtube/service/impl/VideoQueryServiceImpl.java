@@ -11,10 +11,10 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.utils.PropertiesFileLoader;
-import com.query.video.youtube.utils.SearchParameters;
-import com.query.video.youtube.utils.Utils;
+import com.query.video.youtube.utils.VideoManager;
 
 public class VideoQueryServiceImpl implements VideoQueryService {
 
@@ -36,7 +36,7 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 
 	@Override
 	public List<SearchResult> getVideoQuerySearchResults(YouTube.Search.List search, int numberOfPages) {
-		// use pagination to get results from all NUMBER_OF_PAGES pages
+		// use pagination to get results from all numberOfPages pages
 		String nextToken = "";
 		List<SearchResult> searchResultList = new ArrayList<SearchResult>();
 		do {
@@ -49,20 +49,15 @@ public class VideoQueryServiceImpl implements VideoQueryService {
 				System.err.println(e.getCause() + " : " + e.getMessage());
 				e.printStackTrace();
 			}
-			List<SearchResult> videoResults = Utils.checkVideoResults(searchResponse.getItems());
-			//add results from all pages to a list
-			searchResultList.addAll(videoResults);
-			
-			nextToken = searchResponse.getNextPageToken();
-			
+			List<SearchResult> videoResults = new VideoManager().checkVideoResults(searchResponse.getItems());
+			searchResultList.addAll(videoResults);			
+			nextToken = searchResponse.getNextPageToken();			
 		} while (nextToken != null && numberOfPages > 0);
 		return searchResultList;
 	}
 
-
 	@Override
 	public YouTube.Search.List defineVideoSearchRequest(SearchParameters searchParams) {
-		// Define the API request for retrieving search results.
 		YouTube.Search.List search = null;
 		try {
 			search = youtube.search().list(searchParams.getPart());

@@ -7,24 +7,23 @@ import java.util.Properties;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
 
 public class PropertiesFileLoader {
-	/**
-	 * File that contains my developer's API key and application name
-	 */
 	
+	/**
+	 * File that contains developer's API key and application name
+	 */	
 	private static final String PROPERTIES_FILENAME = "youtube.properties";
-	/*
-	 * Returns a property value from Properties
-	 * 
+	
+	/**
+	 * @param propertyName - the name of the property to be retrieved
+	 * @return the property associated to propertyName
 	 */
 	public static String getPropertyFromProperties(String propertyName) {
 		Properties properties = getProperties();
-		String appName = properties.getProperty(propertyName);
-		return appName;
+		return properties.getProperty(propertyName);
 	}
-
-	/*
-	 * Returns the Properties object from youtube.properties file
-	 * 
+	
+	/**
+	 * @return the Properties object from youtube.properties file
 	 */
 	private static Properties getProperties() {
 		// Read the developer key from the properties file.
@@ -40,7 +39,4 @@ public class PropertiesFileLoader {
 		}
 		return properties;
 	}
-
-	
-
 }

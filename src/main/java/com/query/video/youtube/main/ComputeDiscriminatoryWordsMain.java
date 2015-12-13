@@ -2,11 +2,13 @@ package com.query.video.youtube.main;
 
 import java.util.List;
 
+import com.query.video.youtube.models.WordFrequencyTuple;
 import com.query.video.youtube.utils.Utils;
-import com.query.video.youtube.utils.WordFrequencyTuple;
+import com.query.video.youtube.utils.VideoManager;
 
 public class ComputeDiscriminatoryWordsMain {
-	private static final String hadoopOutputDir = "hadoopOutputDir";
+	private static final String HADOOP_OUTPUT_DIR = "hadoopOutputDir";
+	private static final String FILENAME_PART = "Results";
 
 	public static void main(String[] args) {
 
@@ -17,18 +19,20 @@ public class ComputeDiscriminatoryWordsMain {
 					+ "Fourth parameter = threshold for discrimination (e.g. 30) ");
 			System.exit(-1);
 		}
-		String outputDir1 = hadoopOutputDir + "/" + args[0] + "Results";
-		String outputDir2 = hadoopOutputDir + "/" + args[1] + "Results";
+		String outputDir1 = HADOOP_OUTPUT_DIR + "/" + args[0] + FILENAME_PART;
+		String outputDir2 = HADOOP_OUTPUT_DIR + "/" + args[1] + FILENAME_PART;
 
-		List<WordFrequencyTuple> list1 = Utils.createWordFrequencyTuples(outputDir1);
-		List<WordFrequencyTuple> list2 = Utils.createWordFrequencyTuples(outputDir2);
+		VideoManager videoManager = new VideoManager();
+
+		List<WordFrequencyTuple> list1 = videoManager.createSortedWordFrequencyTuples(outputDir1);
+		List<WordFrequencyTuple> list2 = videoManager.createSortedWordFrequencyTuples(outputDir2);
 
 		int noOfDiscriminatoryWords = Integer.parseInt(args[2]);
 		int thresholdForDiscrimination = Integer.parseInt(args[3]);
 
-		List<WordFrequencyTuple> discList1 = Utils.getDiscriminatoryWords(list1, list2, noOfDiscriminatoryWords,
+		List<WordFrequencyTuple> discList1 = videoManager.getDiscriminatoryWords(list1, list2, noOfDiscriminatoryWords,
 				thresholdForDiscrimination);
-		List<WordFrequencyTuple> discList2 = Utils.getDiscriminatoryWords(list2, list1, noOfDiscriminatoryWords,
+		List<WordFrequencyTuple> discList2 = videoManager.getDiscriminatoryWords(list2, list1, noOfDiscriminatoryWords,
 				thresholdForDiscrimination);
 
 		Utils.writeDiscriminatoryWordsToFile(discList1, args[0]);

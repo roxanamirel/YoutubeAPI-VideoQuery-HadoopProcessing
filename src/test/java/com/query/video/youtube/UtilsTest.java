@@ -12,9 +12,9 @@ import org.junit.Test;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
-import com.query.video.youtube.utils.SearchParameters;
 import com.query.video.youtube.utils.Utils;
 
 
@@ -57,7 +57,7 @@ public class UtilsTest {
 		SearchParameters searchParams = setSearchParameters("test", SEARCH_VIDEO_TYPE);
 		YouTube.Search.List search = videoQuery.defineVideoSearchRequest(searchParams);
 		List<SearchResult> videosResultList = videoQuery.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
-		Utils.writeToFile(videosResultList, "test");
+		Utils.writeVideoInfoToFile(videosResultList, "test");
 		file = new File ("testResults.txt");
 		assertTrue(file.exists());
 		assertTrue(file.length()>0);
@@ -70,7 +70,7 @@ public class UtilsTest {
 	}
 	
 	private SearchParameters setSearchParameters(String queryTerm, String type) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder().withPart(PART)
+		SearchParameters searchOptionalParams = new SearchParameters.Builder(PART)
 				.withType(type).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
 				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
 		return searchOptionalParams;

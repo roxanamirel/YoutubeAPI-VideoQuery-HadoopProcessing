@@ -1,9 +1,8 @@
-package com.query.video.youtube.utils;
+package com.query.video.youtube.models;
 
 public class SearchParameters {
-	// mandatory
+	
 	private String part;
-
 	private String type;
 	private String queryTerm;
 	private long numberOfResults;
@@ -51,10 +50,9 @@ public class SearchParameters {
 		private String newQueryTerm;
 		private long newNumberOfResults;
 		private String newQueryFields;
-
-		public Builder withPart(String newPart) {
+		
+		public Builder(String newPart) {
 			this.newPart = newPart;
-			return this;
 		}
 
 		public Builder withType(String type) {
@@ -80,7 +78,5 @@ public class SearchParameters {
 		public SearchParameters build() {
 			return new SearchParameters(this);
 		}
-
 	}
-
 }

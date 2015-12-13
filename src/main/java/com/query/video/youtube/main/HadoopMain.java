@@ -13,15 +13,14 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
 import com.query.video.youtube.hadoop.WordCount;
 import com.query.video.youtube.hadoop.WordCount.TokenizerMapper;
 import com.query.video.youtube.hadoop.WordCount.TokenizerReducer;
+import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
-import com.query.video.youtube.utils.SearchParameters;
 import com.query.video.youtube.utils.Utils;
 
 public class HadoopMain {
@@ -31,45 +30,33 @@ public class HadoopMain {
 	private static final long NUMBER_OF_RESULTS_RETURNED = 25;
 	private static final int NUMBER_OF_PAGES = 3;
 	private static final String hadoopOutputDir = "hadoopOutputDir";
+	private static final String CORE_SITE = "/home/hadoop/hadoop-2.7.1/etc/hadoop/core-site.xml";
+	private static final String HDFS_SITE = "/home/hadoop/hadoop-2.7.1/etc/hadoop/hdfs-site.xml";
 
 	public static void main(String[] args) {
-
+		VideoQueryService service = new VideoQueryServiceImpl();
+		
 		if (args.length != 2) {
 			System.out.println("USAGE + First Parameter = hadoop input directory (e.g. /input)  \n"
 					+ "Second parameter = hadoop output directory");
 			System.exit(-1);
 		}
-		File resultFile = new File("");
-		String queryTerm = "";
-		try {
-			// Prompt the user to enter a query term.
-			queryTerm = Utils.getSearchCriteria();
+		
+		// Prompt the user to enter a query term.
+		String queryTerm = Utils.getSearchCriteria();
 
-			SearchParameters searchOptionalParams = setSearchParameters(queryTerm);
+		SearchParameters searchParams = setSearchParameters(queryTerm);
+		YouTube.Search.List search = service.defineVideoSearchRequest(searchParams);
+		// get search results
+		List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
 
-			VideoQueryService service = new VideoQueryServiceImpl();
-			YouTube.Search.List search = service.defineVideoSearchRequest(searchOptionalParams);
-
-			// get search results
-			List<SearchResult> searchResultList = service.getVideoQuerySearchResults(search, NUMBER_OF_PAGES);
-
-			// write results to File
-			resultFile = Utils.writeToFile(searchResultList, queryTerm);
-
-		} catch (GoogleJsonResponseException e) {
-			System.err.println(e.getDetails().getCode() + " : " + e.getDetails().getMessage());
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.err.println(e.getCause() + " : " + e.getMessage());
-			e.printStackTrace();
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
+		// write results to File
+		File resultFile = Utils.writeVideoInfoToFile(searchResultList, queryTerm);
 
 		try {
 			Configuration conf = new Configuration();
-			conf.addResource(new Path("/home/hadoop/hadoop-2.7.1/etc/hadoop/core-site.xml"));
-			conf.addResource(new Path("/home/hadoop/hadoop-2.7.1/etc/hadoop/hdfs-site.xml"));
+			conf.addResource(new Path(CORE_SITE));
+			conf.addResource(new Path(HDFS_SITE));
 			FileSystem fs = FileSystem.get(conf);
 			Job job = Job.getInstance(conf, "word count");
 			job.setJarByClass(WordCount.class);
@@ -96,10 +83,10 @@ public class HadoopMain {
 	}
 
 	private static SearchParameters setSearchParameters(String queryTerm) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder()
+		SearchParameters searchOptionalParams = new SearchParameters.Builder(PART)
 				// set search resource properties
-				.withPart(PART).withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm)
-				.withQueryFields(SEARCH_QUERY_FIELDS).withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
+				.withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
+				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
 		return searchOptionalParams;
 	}
 }

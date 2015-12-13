@@ -22,7 +22,7 @@ public class WordCount {
 
 		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
-			// remove all not letter characters from the word and set to
+			// remove all no letter characters from the word and set to
 			// lowercase
 			String cleanWord = value.toString().replaceAll("[^\\p{L} ]", "").toLowerCase();
 			StringTokenizer itr = new StringTokenizer(cleanWord);
@@ -50,6 +50,5 @@ public class WordCount {
 			result.set(sum);
 			context.write(key, result);
 		}
-
 	}
 }

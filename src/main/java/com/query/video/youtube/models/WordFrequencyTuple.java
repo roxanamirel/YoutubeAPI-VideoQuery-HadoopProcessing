@@ -1,6 +1,7 @@
-package com.query.video.youtube.utils;
+package com.query.video.youtube.models;
 
 public class WordFrequencyTuple {
+	
 	private String word;
 	private int frequency;
 
@@ -14,16 +15,7 @@ public class WordFrequencyTuple {
 		return word;
 	}
 
-	public void setWord(String word) {
-		this.word = word;
-	}
-
 	public int getFrequency() {
 		return frequency;
 	}
-
-	public void setFrequency(int frequency) {
-		this.frequency = frequency;
-	}
-
 }

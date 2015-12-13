@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchResult;
+import com.query.video.youtube.models.SearchParameters;
 import com.query.video.youtube.service.VideoQueryService;
 import com.query.video.youtube.service.impl.VideoQueryServiceImpl;
-import com.query.video.youtube.utils.SearchParameters;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -71,7 +71,7 @@ public class VideoQueryTest extends TestCase {
 	}
 
 	private SearchParameters setSearchParameters(String queryTerm) {
-		SearchParameters searchOptionalParams = new SearchParameters.Builder().withPart(PART)
+		SearchParameters searchOptionalParams = new SearchParameters.Builder(PART)
 				.withType(SEARCH_VIDEO_TYPE).withQueryTerm(queryTerm).withQueryFields(SEARCH_QUERY_FIELDS)
 				.withNumberOfResults(NUMBER_OF_RESULTS_RETURNED).build();
 		return searchOptionalParams;
